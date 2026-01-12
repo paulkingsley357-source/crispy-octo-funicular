@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Portfolio Login</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #0f172a 0%, #020617 40%),
+        radial-gradient(circle at bottom right, #1e293b 0%, #02010f 55%);
+      color: #f9fafb;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1000px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 18px;
+      padding: 24px 26px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 20px;
+    }
+
+    /* Form basics */
+    .field-group { margin-top: 10px; }
+
+    .field-label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px #22c55e;
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 18px;
+      padding: 10px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #020617;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .login-btn:hover {
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .small-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    /* Multi-step visibility */
+    #loginStep1 { display: block; }
+    #loginStep2 { display: none; }
+    #dashboardCard { display: none; }
+
+    /* Dashboard layout */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #020617;
+    }
+
+    .user-meta {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .logout-btn {
+      font-size: 12px;
+      color: #f97316;
+      background: transparent;
+      border: 1px solid #f97316;
+      border-radius: 999px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 2.6fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card, .table-card, .profile-card {
+      background: #020617;
+      border-radius: 14px;
+      border: 1px solid #1f2937;
+      padding: 12px 14px;
+    }
+
+    .summary-title {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .summary-sub {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 3px;
+    }
+
+    .pill-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      color: #9ca3af;
+    }
+
+    .positive { color: #22c55e; }
+    .negative { color: #f97316; }
+
+    /* Profile block + send/receive */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .profile-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #f97316, #facc15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #111827;
+      font-size: 14px;
+    }
+
+    .profile-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .profile-meta {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .profile-row {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .profile-row span {
+      color: #9ca3af;
+    }
+
+    .time-row {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .action-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      border-radius: 999px;
+      padding: 8px 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .send-btn {
+      background: #f97316;
+      color: #111827;
+    }
+
+    .receive-btn {
+      background: transparent;
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+    }
+
+    /* Table */
+    .table-card h2 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      color: #9ca3af;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    th, td {
+      padding: 6px 4px;
+      text-align: left;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #020617;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: #020617;
+    }
+
+    .asset-symbol {
+      font-weight: 600;
+    }
+
+    .align-right { text-align: right; }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-card {
+      background: #020617;
+      padding: 16px 16px 12px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-card h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .modal-card label {
+      display: block;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+
+    .modal-card input,
+    .modal-card textarea {
+      width: 100%;
+      padding: 8px 9px;
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 13px;
+    }
+
+    .modal-text {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .conversion-row {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .conversion-row span {
+      color: #22c55e;
+    }
+
+    .error-text {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #f97316;
+      font-weight: 600;
+    }
+
+    .contact-row {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .contact-row a {
+      color: #22c55e;
+      text-decoration: none;
+    }
+
+    .receive-address {
+      background: #020617;
+      border-radius: 10px;
+      padding: 8px;
+      border: 1px dashed #374151;
+      font-size: 12px;
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .modal-actions .primary,
+    .modal-actions .secondary {
+      border-radius: 999px;
+      padding: 7px 14px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .modal-actions .primary {
+      background: #22c55e;
+      color: #111827;
+      font-weight: 600;
+    }
+
+    .modal-actions .secondary {
+      background: transparent;
+      color: #9ca3af;
+      border: 1px solid #4b5563;
+    }
+
+    /* Responsive */
+    @media (max-width: 750px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 18px 16px; }
+      h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- LOGIN CARD -->
+    <div class="card" id="loginCard">
+      <h1>Sign in to Crypto Portfolio</h1>
+      <p class="subtitle">Two-step access: email & password, then secret phrase.</p>
+
+      <!-- Step 1: Email + Password -->
+      <form id="loginStep1">
+        <div class="field-group">
+          <label class="field-label" for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            class="field-input"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            class="field-input"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="login-btn">Next</button>
+        <p class="small-note">This login is for demo only; no data is stored.</p>
+      </form>
+
+      <!-- Step 2: 5-word phrase -->
+      <form id="loginStep2">
+        <p class="subtitle" style="margin-top:-8px;">
+          Enter your 5-word access phrase to open the site.
+        </p>
+        <div class="field-group">
+          <label class="field-label" for="phraseInput">5-word phrase</label>
+          <input
+            type="text"
+            id="phraseInput"
+            class="field-input"
+            placeholder="example: word1 word2 word3 word4 word5"
+            required
+          />
+        </div>
+        <button type="submit" class="login-btn">Unlock</button>
+        <p class="small-note">
+          Phrase must match the pre-set secret phrase.
+        </p>
+      </form>
+    </div>
+
+    <!-- DASHBOARD CARD -->
+    <div class="card" id="dashboardCard">
+      <div class="dashboard-header">
+        <div class="user-info">
+          <div class="avatar" id="avatarInitial">U</div>
+          <div>
+            <div class="user-name" id="userName">User</div>
+            <div class="user-meta" id="userMetaText">Demo account</div>
+          </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Log out</button>
+      </div>
+
+      <div class="summary-grid">
+        <!-- LEFT: Profile + actions -->
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">U</div>
+            <div>
+              <div class="profile-name" id="profileName">User Name</div>
+              <div class="profile-meta">Personal profile</div>
+            </div>
+          </div>
+          <div class="profile-row">
+            <span>Country:</span> <span id="profileCountry">Hungary</span>
+          </div>
+          <div class="time-row" id="hungaryTime">
+            Local time (Hungary): --
+          </div>
+
+          <div class="action-row">
+            <button type="button" class="action-btn send-btn" id="sendBtn">Send</button>
+            <button type="button" class="action-btn receive-btn" id="receiveBtn">Receive</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: Portfolio summary -->
+        <div class="summary-card">
+          <div class="summary-title">Total Portfolio Value</div>
+          <div class="summary-value" id="totalValue">0.00 USDT</div>
+          <div class="summary-sub">
+            Live prices powered by CoinGecko (demo amounts, shown in USDT).
+          </div>
+          <div class="pill-row">
+            <div class="pill">BTC, ETH, BNB, USDT, SOL, XRP, ADA, DOGE, DOT, TRX</div>
+            <div class="pill positive" id="dummyChange">+2.4% 24h (demo)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE TRADING + MINI CHART (demo) -->
+      <div class="table-card" style="margin-bottom: 14px;">
+        <h2>Live Trading Overview (Demo)</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;">
+          <div style="flex:1;min-width:180px;">
+            <div style="font-size:12px;color:#9ca3af;">24h P&L</div>
+            <div style="font-size:18px;font-weight:600;color:#22c55e;">+3.7% · +120.45 USDT</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:4px;">
+              Simulated performance based on your assets (demo only).
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">BTC/USDT – 1H (demo)</div>
+            <div style="height:70px;border-radius:10px;background:#020617;border:1px solid #1f2937;position:relative;overflow:hidden;">
+              <div id="miniChart"
+                   style="position:absolute;inset:0;clip-path:polygon(0% 60%,15% 40%,30% 55%,45% 30%,60% 45%,75% 35%,90% 50%,100% 40%,100% 100%,0% 100%);
+                          background-image:linear-gradient(120deg,rgba(34,197,94,0.2),rgba(34,197,94,0.8));">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <h2>Your Assets</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Price (USDT)</th>
+              <th>Amount</th>
+              <th class="align-right">Value (USDT)</th>
+            </tr>
+          </thead>
+          <tbody id="assetTableBody">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEND MODAL -->
+  <div class="modal-backdrop" id="sendModal">
+    <div class="modal-card">
+      <h3>Send Crypto (Demo)</h3>
+      <form id="sendForm">
+        <label>Asset (e.g., BTC)</label>
+        <input type="text" id="sendAsset" placeholder="BTC" required />
+
+        <label>Recipient Address</label>
+        <input type="text" id="sendAddress" required />
+
+        <label>Amount</label>
+        <input type="number" id="sendAmount" step="0.00000001" required />
+
+        <div class="conversion-row" id="conversionRow">
+          USDT equivalent: <span id="hufEquivalent">0 USDT</span>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #1f2937;margin:10px 0;">
+
+        <p class="modal-text">Optional: convert and send to Hungarian bank account (demo)</p>
+
+        <label>Account Holder Name</label>
+        <input type="text" id="bankName" placeholder="e.g., Kovács Péter" />
+
+        <label>Bank Name</label>
+        <input type="text" id="bankBank" placeholder="e.g., OTP Bank Nyrt." />
+
+        <label>IBAN (Hungary, starting with HU)</label>
+        <input type="text" id="bankIban" placeholder="HU12 3456 7891 2345 6789 1234 567" />
+
+        <div class="error-text" id="feeError">
+          You need to pay a transfer fee to complete this transaction.
+        </div>
+        <div class="contact-row">
+          Contact admin:
+          <a href="mailto:admin@example.com">admin@example.com</a> or
+          <a href="https://t.me/your_admin" target="_blank">Telegram</a>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary" data-close="sendModal">Cancel</button>
+          <button type="submit" class="primary">Send (demo)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RECEIVE MODAL -->
+  <div class="modal-backdrop" id="receiveModal">
+    <div class="modal-card">
+      <h3>Receive Crypto (Demo)</h3>
+      <p class="modal-text">Share this address to receive crypto (demo address only):</p>
+      <div class="receive-address" id="receiveAddrDisplay">
+        0x1234exampleexample000000000000000000
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" data-close="receiveModal">Close</button>
+        <button type="button" class="primary" id="copyReceiveAddr">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== SETTINGS: secret 5-word phrase =====
+    // You can change this to your own phrase
+    const SECRET_PHRASE = 'apple river candle stone sky';
+
+    // ===== ELEMENTS =====
+    const loginCard = document.getElementById('loginCard');
+    const dashboardCard = document.getElementById('dashboardCard');
+
+    const loginStep1 = document.getElementById('loginStep1');
+    const loginStep2 = document.getElementById('loginStep2');
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const phraseInput = document.getElementById('phraseInput');
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userNameEl = document.getElementById('userName');
+    const avatarInitialEl = document.getElementById('avatarInitial');
+    const userMetaTextEl = document.getElementById('userMetaText');
+
+    const profileNameEl = document.getElementById('profileName');
+    const profileAvatarEl = document.getElementById('profileAvatar');
+    const hungaryTimeEl = document.getElementById('hungaryTime');
+
+    // Hungary time updater
+    function updateHungaryTime() {
+      const now = new Date();
+      const options = {
+        timeZone: 'Europe/Budapest',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      };
+      const timeString = now.toLocaleTimeString('en-GB', options);
+      hungaryTimeEl.textContent = 'Local time (Hungary): ' + timeString;
+    }
+    setInterval(updateHungaryTime, 1000);
+
+    // Step 1: email + password
+    loginStep1.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const pwd = passwordInput.value.trim();
+
+      if (!email || !pwd) {
+        alert('Please enter email and password.');
+        return;
+      }
+
+      const namePart = email.split('@')[0];
+      const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+
+      userNameEl.textContent = displayName;
+      avatarInitialEl.textContent = displayName.charAt(0);
+      profileNameEl.textContent = displayName;
+      profileAvatarEl.textContent = displayName.charAt(0);
+      userMetaTextEl.textContent = 'Demo portfolio user';
+
+      loginStep1.style.display = 'none';
+      loginStep2.style.display = 'block';
+    });
+
+    // Step 2: phrase verification
+    loginStep2.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const entered = phraseInput.value.trim().toLowerCase().replace(/\s+/g, ' ');
+
+      if (!entered) {
+        alert('Please enter the 5-word phrase.');
+        return;
+      }
+
+      if (entered !== SECRET_PHRASE) {
+        alert('Incorrect phrase. Please try again.');
+        return;
+      }
+
+      loginCard.style.display = 'none';
+      dashboardCard.style.display = 'block';
+
+      updateHungaryTime();
+      fetchPortfolioPrices();
+    });
+
+    logoutBtn.addEventListener('click', function () {
+      dashboardCard.style.display = 'none';
+      loginCard.style.display = 'block';
+      loginStep1.style.display = 'block';
+      loginStep2.style.display = 'none';
+      loginStep1.reset();
+      loginStep2.reset();
+    });
+
+    // ===== PORTFOLIO LOGIC (USDT) =====
+    const portfolio = [
+      { id: 'bitcoin',        symbol: 'BTC',  amount: 0.15 },
+      { id: 'ethereum',       symbol: 'ETH',  amount: 2.4 },
+      { id: 'binancecoin',    symbol: 'BNB',  amount: 3.2 },
+      { id: 'tether',         symbol: 'USDT', amount: 500 },
+      { id: 'solana',         symbol: 'SOL',  amount: 8.5 },
+      { id: 'ripple',         symbol: 'XRP',  amount: 1200 },
+      { id: 'cardano',        symbol: 'ADA',  amount: 2500 },
+      { id: 'dogecoin',       symbol: 'DOGE', amount: 5000 },
+      { id: 'polkadot',       symbol: 'DOT',  amount: 120 },
+      { id: 'tron',           symbol: 'TRX',  amount: 8000 },
+    ];
+
+    const assetTableBody = document.getElementById('assetTableBody');
+    const totalValueEl = document.getElementById('totalValue');
+
+    const priceMap = {};
+
+    async function fetchPortfolioPrices() {
+      try {
+        const ids = portfolio.map(a => a.id).join(',');
+        const vsCurrency = 'usd';
+        const apiUrl =
+          'https://api.coingecko.com/api/v3/simple/price?ids=' +
+          ids +
+          '&vs_currencies=' +
+          vsCurrency;
+
+        const res = await fetch(apiUrl);
+        if (!res.ok) {
+          throw new Error('Failed to fetch prices');
+        }
+        const data = await res.json();
+
+        let total = 0;
+        assetTableBody.innerHTML = '';
+
+        portfolio.forEach(asset => {
+          const priceUsd = data[asset.id]?.usd ?? 0;
+          priceMap[asset.symbol] = priceUsd;
+
+          const valueUsdt = priceUsd * asset.amount; // USDT ≈ USD
+          total += valueUsdt;
+
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+            <td><span class="asset-symbol">${asset.symbol}</span></td>
+            <td>${priceUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT</td>
+            <td>${asset.amount}</td>
+            <td class="align-right">${valueUsdt.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT</td>
+          `;
+
+          assetTableBody.appendChild(tr);
+        });
+
+        totalValueEl.textContent =
+          total.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' USDT';
+      } catch (err) {
+        console.error(err);
+        alert('Could not load live prices. Please try again.');
+      }
+    }
+
+    // ===== SEND & RECEIVE MODALS (DEMO) =====
+    const sendBtn = document.getElementById('sendBtn');
+    const receiveBtn = document.getElementById('receiveBtn');
+    const sendModal = document.getElementById('sendModal');
+    const receiveModal = document.getElementById('receiveModal');
+    const sendForm = document.getElementById('sendForm');
+    const copyReceiveAddr = document.getElementById('copyReceiveAddr');
+    const receiveAddrDisplay = document.getElementById('receiveAddrDisplay');
+    const hufEquivalentEl = document.getElementById('hufEquivalent');
+    const sendAmountInput = document.getElementById('sendAmount');
+    const sendAssetInput = document.getElementById('sendAsset');
+
+    function openModal(modal) {
+      modal.style.display = 'flex';
+    }
+
+    function closeModal(modal) {
+      modal.style.display = 'none';
+    }
+
+    sendBtn.addEventListener('click', () => openModal(sendModal));
+    receiveBtn.addEventListener('click', () => openModal(receiveModal));
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = e.target.getAttribute('data-close');
+        const modal = document.getElementById(id);
+        if (modal) closeModal(modal);
+      });
+    });
+
+    function updateUsdtEquivalent() {
+      const amount = parseFloat(sendAmountInput.value || '0');
+      const assetSymbol = sendAssetInput.value.trim().toUpperCase();
+
+      if (!amount || !priceMap[assetSymbol]) {
+        hufEquivalentEl.textContent = '0 USDT';
+        return;
+      }
+
+      const priceUsd = priceMap[assetSymbol];
+      const valueUsdt = priceUsd * amount;
+      hufEquivalentEl.textContent =
+        valueUsdt.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' USDT';
+    }
+
+    sendAmountInput.addEventListener('input', updateUsdtEquivalent);
+    sendAssetInput.addEventListener('input', updateUsdtEquivalent);
+
+    sendForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const asset = sendAssetInput.value.trim();
+      const addr = document.getElementById('sendAddress').value.trim();
+      const amt = sendAmountInput.value.trim();
+
+      const bankHolder = document.getElementById('bankName').value.trim();
+      const bankBank   = document.getElementById('bankBank').value.trim();
+      const bankIban   = document.getElementById('bankIban').value.trim();
+
+      if (!asset || !addr || !amt) {
+        alert('Please fill in asset, address, and amount.');
+        return;
+      }
+
+      let bankInfo = '';
+      if (bankHolder || bankBank || bankIban) {
+        bankInfo =
+          '\n\nBank transfer request (demo):' +
+          `\nName: ${bankHolder || '-'}\nBank: ${bankBank || '-'}\nIBAN: ${bankIban || '-'}`;
+      }
+
+      alert(
+        'Demo only:\n' +
+        'You need to pay a transfer fee to complete this transaction.\n\n' +
+        'Please contact the admin via email or Telegram for assistance.' +
+        bankInfo
+      );
+
+      closeModal(sendModal);
+      sendForm.reset();
+      hufEquivalentEl.textContent = '0 USDT';
+    });
+
+    copyReceiveAddr.addEventListener('click', async () => {
+      const text = receiveAddrDisplay.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Address copied to clipboard (demo).');
+      } catch {
+        alert('Failed to copy. Please copy manually.');
+      }
+    });
+  </script>
+</body>
+</html>
